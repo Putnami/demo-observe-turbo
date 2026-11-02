@@ -19,3 +19,10 @@ export function subtotal(lines: unknown[]): number {
 export function withTax(cents: number, basisPoints: number): number {
   return cents + Math.floor((cents * basisPoints + 5000) / 10000);
 }
+
+/** Removes a percentage in basis points, rounded in favor of the customer. */
+export function discount(cents: number, basisPoints: number): number {
+  if (basisPoints <= 0) return cents;
+  if (basisPoints >= 10000) return 0;
+  return cents - Math.floor((cents * basisPoints + 4999) / 10000);
+}

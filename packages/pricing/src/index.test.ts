@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { subtotal, withTax } from './index.js';
+import { discount, subtotal, withTax } from './index.js';
 
 describe('subtotal', () => {
   it('sums the lines', () => {
@@ -19,5 +19,19 @@ describe('subtotal', () => {
 describe('withTax', () => {
   it('adds 20 %', () => {
     expect(withTax(1000, 2000)).toBe(1200);
+  });
+});
+
+describe('discount', () => {
+  it('removes 10 %', () => {
+    expect(discount(1000, 1000)).toBe(900);
+  });
+
+  it('keeps the amount without a rate', () => {
+    expect(discount(1000, 0)).toBe(1000);
+  });
+
+  it('never goes below zero', () => {
+    expect(discount(1000, 12000)).toBe(0);
   });
 });
