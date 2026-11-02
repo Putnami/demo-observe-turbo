@@ -33,13 +33,16 @@ jobs:
         if: ${{ !cancelled() }}
         env:
           PUTNAMI_CLOUD_TOKEN: ${{ secrets.PUTNAMI_CLOUD_TOKEN }}
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           curl -fsSL https://putnami.dev/install.sh | bash -s -- --version canary
           export PATH="$HOME/.putnami/bin:$PATH"
           putnami extensions install --user @putnami/observe@canary
           putnami extensions install --user @putnami/cloud@canary
+          putnami extensions install --user @putnami/intelligence@canary
           putnami observe --evidence observe-evidence.json --upload --publish
+          putnami intelligence review-change --evidence observe-evidence.json --upload
       - uses: actions/upload-artifact@v4
         if: ${{ !cancelled() }}
         with:
