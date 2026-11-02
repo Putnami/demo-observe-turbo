@@ -8,6 +8,10 @@ on:
 jobs:
   test:
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      statuses: write
+      pull-requests: write
     steps:
       - uses: actions/checkout@v4
       - uses: pnpm/action-setup@v4
@@ -40,6 +44,23 @@ jobs:
         with:
           name: observe-evidence
           path: observe-evidence.json
+      # Preview of putnami observe --publish (Putnami/putnami#762), built from
+      # its branch until it reaches the canary channel. It runs twice: the
+      # second run updates the note the first one wrote.
+      - uses: actions/setup-go@v5
+        if: ${{ !cancelled() && github.event_name == 'pull_request' }}
+        with:
+          go-version: '1.26'
+          cache: false
+      - name: Publish the summary on the pull request
+        if: ${{ !cancelled() && github.event_name == 'pull_request' }}
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          git clone --quiet --depth 1 --branch fdumay/759-observe-host-note https://github.com/Putnami/putnami "$RUNNER_TEMP/putnami"
+          (cd "$RUNNER_TEMP/putnami/tooling/observe" && GOWORK=off go build -o "$RUNNER_TEMP/putnami-observe" ./cmd/putnami-observe)
+          "$RUNNER_TEMP/putnami-observe" run --publish
+          "$RUNNER_TEMP/putnami-observe" run --publish
 
   publish:
     needs: test
